@@ -24,6 +24,10 @@ void setVerify()
 }
 
 
+// SELECT TIKI,TAKA,TEKE FROM FASDDSFASA WHERE 1=1;
+
+
+
 void  writeTable(vector<string> lexemes)
 {
   FILE * pFile;
@@ -90,6 +94,7 @@ vector< pair<string , string > >  checkTable(string tabla)
   FILE * pFile;
   string nName = tabla;
   nName += ".table";
+  // cout << nName << "<--\n";
   char buffer[100];
   pFile = fopen(nName.c_str() , "r");
   if(pFile == NULL) perror("La tabla no existe!\n");
@@ -119,6 +124,97 @@ vector< pair<string , string > >  checkTable(string tabla)
   return S;
 }
 
+
+void getDataInTable(vector<string> conditions, vector< pair< string , string > > fields, string table )
+{
+  FILE * pFile;
+  string nName = table;
+  nName += ".table";
+  char buffer[100];
+  pFile = fopen(nName.c_str() , "r");
+  bool isData = 0;
+  printf("\n\n");
+  printf("Resultado de Consulta\n", table.c_str());
+  for(int i = 0 ; i < fields.size() ; ++i)
+    {
+      printf("-------------");
+    }
+  printf("\n");
+  for(int i = 0 ; i < fields.size() ; ++i)
+    {
+      printf("-------------");
+    }
+  printf("\n");
+  for(int i = 0 ; i < fields.size() ; ++i)
+    {
+      printf("| %-10s ",fields[i].second.c_str());
+    }
+  printf("|\n");
+  for(int i = 0 ; i < fields.size() ; ++i)
+    {
+      printf("-------------");
+    }
+  printf("\n");
+  if(pFile == NULL) perror("La tabla no existe!\n");
+  else
+    {
+      while ( ! feof (pFile) )
+        {
+          memset(buffer,0,sizeof buffer);
+          if ( fgets (buffer , 100 , pFile) == NULL ) break;
+          if(buffer[0] == '-') // Fin de la estructura
+            {
+              isData=1;
+              continue;
+            }
+          if(isData)
+            {
+              string str(buffer);
+              vector<string> lexemes = giveMeLexemes(str);
+              for(int i = 0 ;i < lexemes.size() ; ++i)
+                {
+                  printf("| %10s ", lexemes[i].c_str());
+                }
+              printf("|\n");
+            }
+        }
+      fclose (pFile);
+    }
+  printf("\n\n");
+}
+
+void selectResult(vector<string> lexemes)
+{
+  int iFrom=-1,iWhere=-1;
+  for(int i = 0;i < lexemes.size() ; ++i)
+    {
+      if(lexemes[i] == "FROM")
+        iFrom = i;
+      if(lexemes[i] == "WHERE")
+        iWhere = i;
+    }
+  vector<string> tNames;
+  tNames.resize(iWhere-iFrom-1);
+  vector< vector< pair<string, string> >  > toMemory;
+  vector< string > conditions;
+  toMemory.resize(iWhere-iFrom-1);
+  for(int i = iFrom + 1, j = 0 ; i < iWhere; ++i, ++j )
+    {
+      tNames[j] = lexemes[i];
+      // cout << tNames[j] << "\n";
+    }
+
+  for(int i = iWhere; i < lexemes.size() ; ++i)
+    conditions.push_back(lexemes[i]);
+  for(int i = 0 ;i < tNames.size() ; ++i)
+    {
+      toMemory[i] = checkTable(tNames[i]);
+    }
+  for(int i = 0 ; i < tNames.size() ; ++i)
+    getDataInTable(conditions,toMemory[i],tNames[i]);
+
+}
+
 bool insertInTable(vector<string> myLexemes , vector< pair < string ,string > > types)
 {
   string nuevo,act;
@@ -127,12 +223,14 @@ bool insertInTable(vector<string> myLexemes , vector< pair < string ,string > > 
   for(int i = 0 ;i < myLexemes.size() - 2 ; ++i)
     {
       act = myLexemes[i+2];
-      cout << act << types[i].first << "\n";
+      // cout << act << types[i].first << "\n";
       if(!regex_match(act,verificar[types[i].first]))
         {
           return 0;
         }
+      nuevo += "\"";
       nuevo += act;
+      nuevo += "\"";
       nuevo += " ";
     }
   nuevo += "\n";
@@ -152,7 +250,7 @@ void getOption(string sentence)
   setDispatcher();
   setVerify();
   vector<string> myLexemes = giveMeLexemes(sentence);
-  printLexemes(myLexemes);
+  // printLexemes(myLexemes);
   switch(dispatcher[myLexemes[0]])
     {
     case 1: // CREATE
@@ -162,8 +260,11 @@ void getOption(string sentence)
       if(myLexemes[1] == "TABLE")
         deleteTable(myLexemes[2]);
       break;
-    case 3:
-      break;
+    case 3: // SELECT
+      {
+        selectResult(myLexemes);
+        break;
+      }
     case 4:
       break;
     case 5://STATUS
