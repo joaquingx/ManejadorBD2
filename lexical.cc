@@ -1,7 +1,9 @@
-#include <bits/stdc++.h>
-using namespace std;
+#include "lexical.h"
 
-bool isAString(char x)
+
+lexicalAnalizer::lexicalAnalizer()
+{};
+bool lexicalAnalizer::isAString(char x)
 {
   if(x == 34)// es un "
     {
@@ -10,10 +12,10 @@ bool isAString(char x)
   return false;
 }
 
-vector<string> giveMeLexemes(string sentence)
+vString lexicalAnalizer::giveMeLexemes(string sentence)
 {
   bool inString = 0;
-  vector<string> res;
+  vString res;
   sentence += " ";
   string separators=" \n";
   string actLexeme = "";
