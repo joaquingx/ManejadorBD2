@@ -201,7 +201,6 @@ void selectResult(vector<string> lexemes)
   for(int i = iFrom + 1, j = 0 ; i < iWhere; ++i, ++j )
     {
       tNames[j] = lexemes[i];
-      // cout << tNames[j] << "\n";
     }
 
   for(int i = iWhere; i < lexemes.size() ; ++i)
