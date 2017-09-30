@@ -6,6 +6,7 @@ table::table(string tName)
   name = tName;
   name += ".table";
   char buffer[100];
+  cout << name << "\n";
   pFile = fopen(name.c_str() , "r");
   if(pFile == NULL) perror("La tabla no existe!\n");
   else

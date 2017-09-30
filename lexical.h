@@ -7,6 +7,7 @@ class lexicalAnalizer{
   lexicalAnalizer();
   bool isAString(char x);
   vString giveMeLexemes(string sentence);
+  vString conditonLexemes();
 };
 
 #endif

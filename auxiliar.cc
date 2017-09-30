@@ -34,7 +34,8 @@ mapSR auxiliar::giveVerify()
 void auxiliar::printLexemes(vString myLexemes)
 {
   for(int i =0 ; i < myLexemes.size() ; ++i)
-    cout << myLexemes[i] << "\n";
+    cout << myLexemes[i] << " ";
+  cout << "\n";
 }
 
 void auxiliar::getOption(string sentence)
@@ -51,9 +52,16 @@ void auxiliar::getOption(string sentence)
       manager->createTable(myLexemes);
       break;
     case 2: // DELETE
-      if(myLexemes[1] == "TABLE")
-        manager->deleteTable(myLexemes[2]);
-      break;
+      {
+        if(myLexemes[1] == "TABLE")
+          manager->deleteTable(myLexemes[2]);
+        else
+          {
+            operador = new operations(myLexemes[1]);//tamal
+            operador->deleteInTable(myLexemes);
+          }
+        break;
+      }
     case 3: // SELECT
       {
         operador = new operations(myLexemes[1]);//tamal
@@ -61,17 +69,28 @@ void auxiliar::getOption(string sentence)
         break;
       }
     case 4:
-      break;
+      {
+        operador = new operations(myLexemes[1]);
+        operador->updateInTable(myLexemes);
+        break;
+      }
     case 5://STATUS
       system("ls *.table");
       break;
     case 6 ://INSERT
       {
-        operador = new operations(myLexemes[1]);
-        if( operador->insertInTable(myLexemes) )
-          cout << "Se inserto correctamente!\n";
-        else
-          cout << "Existe un error en la insercion\n";
+        if(myLexemes[1] == "BLOCK")
+          {
+            operador = new operations(myLexemes[2]);
+            operador->insertInBlock(myLexemes);
+          }
+        else{
+          operador = new operations(myLexemes[1]);
+          if( operador->insertInTable(myLexemes,2,myLexemes[1]) )
+            cout << "Se inserto correctamente!\n";
+          else
+            cout << "Existe un error en la insercion\n";
+        }
         break;
       }
     case 7 : // CHECK
@@ -84,4 +103,3 @@ void auxiliar::getOption(string sentence)
       cout << "Sentencia incorrecta, escriba denuevo!\n";
     }
 }
-

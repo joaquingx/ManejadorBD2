@@ -25,11 +25,26 @@ void file::createTable(vString lexemes)
     }
 }
 
+void file::replaceInTable(string name , string toInsert)
+{
+  FILE * pFile;
+  string nName = name;
+  pFile = fopen(nName.c_str(), "w");
+  if(pFile != NULL)
+    {
+      fputs(toInsert.c_str(),pFile);
+      fclose(pFile);
+    }
+}
+
+
+
 void file::appendInTable(string name , string toInsert)
 {
   FILE * pFile;
   string nName = name;
   nName += ".table";
+  // cout << nName << "<--\n";
   pFile = fopen(nName.c_str(), "a");
   if(pFile != NULL)
     {

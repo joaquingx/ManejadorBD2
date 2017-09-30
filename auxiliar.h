@@ -25,6 +25,7 @@ class auxiliar{
   mapSR giveVerify();
   void printLexemes(vString myLexemes);
   void getOption(string sentence);
+  void replaceInTable(string name , string toInsert);
 };
 
 #endif

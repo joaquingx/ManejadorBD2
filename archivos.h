@@ -9,6 +9,7 @@ class file{
   void createTable(vString lexemes);
   void appendInTable(string name , string toInsert);
   void deleteTable(string toDelete);
+  void replaceInTable(string name , string toInsert);
 };
 
 #endif

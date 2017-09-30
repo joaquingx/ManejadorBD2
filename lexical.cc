@@ -17,7 +17,8 @@ vString lexicalAnalizer::giveMeLexemes(string sentence)
   bool inString = 0;
   vString res;
   sentence += " ";
-  string separators=" \n";
+  string separators=" \n<=>";
+  string nomas="<=>";
   string actLexeme = "";
   for(int i = 0 ; i < sentence.size() ; ++i)
     {
@@ -45,6 +46,11 @@ vString lexicalAnalizer::giveMeLexemes(string sentence)
           {
             if(actLexeme != "")
               {
+                res.push_back(actLexeme);
+              }
+            if(nomas.find(sentence[i]) != string::npos)
+              {
+                actLexeme = sentence[i];
                 res.push_back(actLexeme);
               }
             actLexeme = "";
