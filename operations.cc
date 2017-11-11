@@ -2,7 +2,12 @@
 #include "table.h"
 #include "lexical.h"
 #include "archivos.h"
+#include <ctime>
 #define MAXN 200
+
+vector<string> trampita;
+map<string , vector<int> > indice;
+int gCampo;
 
 operations::operations(string tName)
 {
@@ -51,13 +56,39 @@ void operations::printStructure()
 }
 
 
-void operations::getDataInTable(vString conditions, bool noCondition)
+void operations::getInMemory()
 {
   lexicalAnalizer * analizer = new lexicalAnalizer();
   FILE * pFile;
+  bool isData=0;
   string nName = t->name;
   char buffer[MAXN];
   pFile = fopen(nName.c_str() , "r");
+  if(pFile == NULL) perror("");
+  else
+    {
+      while ( ! feof (pFile) )
+        {
+          memset(buffer,0,sizeof buffer);
+          if ( fgets (buffer , MAXN , pFile) == NULL ) break;
+          if(buffer[0] == '-') // Fin de la estructura
+            {
+              isData=1;
+              continue;
+            }
+          if(isData and buffer[0] == '\"')
+            {
+              trampita.push_back(string(buffer));
+            }
+        }
+      fclose (pFile);
+    }
+  printf("\n\n");
+}
+
+void operations::getDataInTable(vString conditions, bool noCondition)
+{
+  lexicalAnalizer * analizer = new lexicalAnalizer();
   bool isData = 0;
   printf("\n\n");
   printf("Resultado de Consulta\n", t->name.c_str());
@@ -81,44 +112,100 @@ void operations::getDataInTable(vString conditions, bool noCondition)
       printf("-------------");
     }
   printf("\n");
-  // for(int i = 0 ;i < conditions.size();++i)
-  //   cout << conditions[i] << " ";
-  // cout << "\n";
-  if(pFile == NULL) perror("La tabla no existe!\n");
-  else
+  int idx = searchInFields(conditions,t);
+  // cout << idx << "\n";
+  if(!indice.empty() and idx == gCampo)
     {
-      int idx = searchInFields(conditions,t);
-      while ( ! feof (pFile) )
+      if(conditions[1] == ">")
         {
-          memset(buffer,0,sizeof buffer);
-          if ( fgets (buffer , MAXN , pFile) == NULL ) break;
-          if(buffer[0] == '-') // Fin de la estructura
+          map<string,vector<int> >::iterator it = indice.find(conditions[2]);
+          for(; it != indice.end() ; it++)
             {
-              isData=1;
-              continue;
-            }
-          if(isData and buffer[0] == '\"')
-            {
-              string str(buffer);
-              vString lexemes = analizer->giveMeLexemes(str);
-              // cout << lexemes[idx] << " xD";
-              if(noCondition or isTrue(lexemes,conditions,idx))
+              for(int k = 0 ; k < it->second.size() ; ++k)
                 {
-                  // if(why == 1) // UPDATE
-                  //   {
-
-                  //   }
-                  for(int i = 0 ;i < lexemes.size()-1 ; ++i)
+                  int iii = it->second[k];
+                  string str(trampita[iii]);
+                  vString lexemes = analizer->giveMeLexemes(str);
+                  for(int j = 0 ;j < lexemes.size()-1 ; ++j)
                     {
-                      printf("| %10s ", lexemes[i].c_str());
+                      printf("| %10s ", lexemes[j].c_str());
                     }
                   printf("|\n");
                 }
             }
         }
-      fclose (pFile);
+      else
+        {
+          if(conditions[1] == "=")
+            for(int i = 0 ;i < indice[conditions[2]].size() ; ++i)
+              {
+                int iii = indice[conditions[2]][i];
+                string str(trampita[iii]);
+                vString lexemes = analizer->giveMeLexemes(str);
+                for(int j = 0 ;j < lexemes.size()-1 ; ++j)
+                  {
+                    printf("| %10s ", lexemes[j].c_str());
+                  }
+                printf("|\n");
+              }
+          else
+            if(conditions[1] == ">")
+              {
+                map<string,vector<int> >::iterator it = indice.find(conditions[2]);
+                for(map<string,vector<int> >::iterator it2 = indice.begin() ; it2 != it ; it++)
+                  {
+                    for(int k = 0 ; k < it2->second.size() ; ++k)
+                      {
+                        int iii = it2->second[k];
+                        string str(trampita[iii]);
+                        vString lexemes = analizer->giveMeLexemes(str);
+                        for(int j = 0 ;j < lexemes.size()-1 ; ++j)
+                          {
+                            printf("| %10s ", lexemes[j].c_str());
+                          }
+                        printf("|\n");
+                      }
+                  }
+              }
+        }
     }
-  printf("\n\n");
+  else
+    {
+      for(int i = 0 ;i < trampita.size(); ++i)
+        {
+          string str(trampita[i]);
+          vString lexemes = analizer->giveMeLexemes(str);
+          if(noCondition or isTrue(lexemes,conditions,idx))
+            {
+              for(int i = 0 ;i < lexemes.size()-1 ; ++i)
+                {
+                  printf("| %10s ", lexemes[i].c_str());
+                }
+              printf("|\n");
+            }
+        }
+    }
+}
+
+void operations::indexar(int campo)
+{
+  gCampo = campo;
+  lexicalAnalizer * analizer = new lexicalAnalizer();
+  for(int i = 0; i < trampita.size() ;++i)
+    {
+      string actual = analizer->giveMeLexemes(trampita[i])[campo];
+      indice[actual].push_back(i);
+    }
+}
+
+void operations::createIndex(vString Lexemes)
+{
+  indice.clear();
+  cout << Lexemes[2] << "<==\n";
+  int n = stoi(Lexemes[2]);
+  if(trampita.empty())
+    getInMemory();
+  indexar(n);
 }
 
 void operations::selectResult(vString lexemes)
@@ -155,9 +242,16 @@ void operations::selectResult(vString lexemes)
     }
   for(int i = 0 ; i < tNames.size() ; ++i)
     {
+      if(trampita.empty())
+        getInMemory();
+      clock_t begin = clock();
       getDataInTable(conditions,0);
+      clock_t end = clock();
+      double elapsed = double(end - begin) / CLOCKS_PER_SEC;
+      cout << "elapsed time: " << elapsed << "\n";
     }
 }
+
 
 // INSERT TABLA TAL TAL TAL TAL
 bool operations::insertInTable(vString myLexemes, int extra , string tName)

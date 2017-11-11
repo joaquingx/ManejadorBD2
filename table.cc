@@ -8,7 +8,7 @@ table::table(string tName)
   char buffer[100];
   cout << name << "\n";
   pFile = fopen(name.c_str() , "r");
-  if(pFile == NULL) perror("La tabla no existe!\n");
+  if(pFile == NULL) perror("");
   else
     {
       while ( ! feof (pFile) )

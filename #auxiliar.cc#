@@ -15,8 +15,7 @@ mapSI auxiliar::giveDispatcher()
   dispatcher["UPDATE"] = 4;
   dispatcher["STATUS"] = 5;
   dispatcher["INSERT"] = 6;
-  dispatcher["CHECK"] = 7;
-  dispatcher["INDEX"] = 8;
+w
   return dispatcher;
 }
 
@@ -102,7 +101,6 @@ void auxiliar::getOption(string sentence)
     case 8: // INDEX
       {
         operador->createIndex(myLexemes);
-        break;
       }
     default:
       cout << "Sentencia incorrecta, escriba denuevo!\n";

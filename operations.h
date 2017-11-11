@@ -21,6 +21,9 @@ class operations{
   bool deleteInTable(vString myLexemes);
   bool updateInTable(vString myLexemes);
   int insertInBlock(vString myLexemes);
+  void indexar(int campo);
+  void getInMemory();
+  void createIndex(vString Lexemes);
 };
 
 #endif
